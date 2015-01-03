@@ -93,7 +93,6 @@ sub gather_files {
 
     my $todo_md = Dist::Zilla::File::InMemory->new(
         name => "TODO.md", content => $output_md);
-    $self->log("Generating TODO.md");
     $self->add_file($todo_md);
 }
 

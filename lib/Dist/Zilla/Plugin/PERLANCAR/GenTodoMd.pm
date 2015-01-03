@@ -4,6 +4,7 @@ package Dist::Zilla::Plugin::PERLANCAR::GenTodoMd;
 # VERSION
 
 use 5.010001;
+use autodie;
 use strict;
 use warnings;
 
@@ -27,23 +28,65 @@ sub gather_files {
         return;
     };
 
-    my $output = capturex(
+    my $name = $self->zilla->name;
+
+    # find out dist's short name (i keep short names in ~/proj/perl/dists/)
+    my $shortname;
+    {
+        my $dists_dir = "$ENV{HOME}/proj/perl/dists";
+        last unless (-d $dists_dir);
+        opendir my($dh), $dists_dir;
+        for (sort readdir $dh) {
+            if ((-l "$dists_dir/$_") &&
+                    readlink("$dists_dir/$_") =~ m!/perl-\Q$name\E\z!) {
+                $shortname = $_;
+                last;
+            }
+        }
+    }
+
+    my @cmd = (
         "filter-org-by-headlines",
         "--without-preamble",
         "--is-todo",
         "--isnt-done",
-        "--level 2",
+        "--level", 2,
         "--parent-match", "proj/perl",
+        "--match",
+        "/(\\Q$name\\E" . ($shortname?"|\\Q$shortname\\E":"") . ")(, \\S+)*:/",
         $todo_org_path,
     );
+    #$self->log_debug(["cmd: %s", \@cmd]);
+    $self->log_debug(["cmd: %s", join(" ", @cmd)]);
+    my $output = capturex(@cmd);
+
+    $output or do {
+        $self->log_debug("Skipped generating TODO.md (no todo items)");
+        return;
+    };
 
     # quick hack to convert to markdown
     my $output_md = '';
     {
+        my $prev_is_hl;
+        my $prev_is_verbatim;
         for my $line (split /^/, $output) {
             if ($line =~ /\A(\*+) (.+)/) {
                 $output_md .= "* $2\n";
+                $prev_is_hl++;
+                $prev_is_verbatim = 0;
             } else {
+                $output_md .= "\n" if $prev_is_hl;
+                # change verbatim ": ..." to markdown style
+                if ($line =~ s/^\s*: (.*)/    $1/) {
+                    $output_md .= "\n" unless $prev_is_verbatim;
+                    $prev_is_verbatim++;
+                } else {
+                    $prev_is_verbatim = 0;
+                }
+                $line =~ s/^/  /g;
+                $output_md .= $line;
+                $prev_is_hl = 0;
             }
         }
     }

@@ -1,5 +1,13 @@
 Revision history for Dist-Zilla-Plugin-PERLANCAR-GenTodoMd
 
+0.02    2015-01-03 (PERLANCAR)
+
+	- [dist] Add dependency to App::OrgUtils (filter-org-by-headlines).
+
+	- Tweak Markdown: add blank line before the next headline if
+	  previous headline has text.
+
+
 0.01     2015-01-03 (PERLANCAR)
 
          - First release.

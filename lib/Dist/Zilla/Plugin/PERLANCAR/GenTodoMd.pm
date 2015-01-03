@@ -70,12 +70,16 @@ sub gather_files {
     {
         my $prev_is_hl;
         my $prev_is_verbatim;
+        my $prev_hl_has_text;
         for my $line (split /^/, $output) {
             if ($line =~ /\A(\*+) (.+)/) {
+                $output_md .= "\n" if $prev_hl_has_text;
                 $output_md .= "* $2\n";
                 $prev_is_hl++;
+                $prev_hl_has_text = 0;
                 $prev_is_verbatim = 0;
             } else {
+                $prev_hl_has_text++;
                 $output_md .= "\n" if $prev_is_hl;
                 # change verbatim ": ..." to markdown style
                 if ($line =~ s/^\s*: (.*)/    $1/) {
@@ -121,4 +125,3 @@ If there is no C<todo.org> file, nothing will be generated.
 =head1 SEE ALSO
 
 L<http://neilb.org/2014/12/13/todo-convention-for-cpan.html>
-

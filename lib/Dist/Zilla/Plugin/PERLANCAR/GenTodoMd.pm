@@ -53,7 +53,8 @@ sub gather_files {
         "--level", 2,
         "--parent-match", "proj/perl",
         "--match",
-        "/(\\Q$name\\E" . ($shortname?"|\\Q$shortname\\E":"") . ")(, \\S+)*:/",
+        "/(".quotemeta($name).
+            ($shortname ? "|".quotemeta($shortname):"").")(, \\S+)*:/",
         $todo_org_path,
     );
     #$self->log_debug(["cmd: %s", \@cmd]);

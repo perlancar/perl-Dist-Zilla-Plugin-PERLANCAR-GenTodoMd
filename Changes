@@ -1,5 +1,11 @@
 Revision history for Dist-Zilla-Plugin-PERLANCAR-GenTodoMd
 
+0.04    2015-04-10 (PERLANCAR)
+
+	- Try to fix escaping to avoid 'Unrecognized escape \Q passed
+	  through ...' perl warning, this double escaping is tricky.
+
+
 0.03    2015-01-04 (PERLANCAR)
 
 	- Add sanity check to avoid (mis)exporting unrelated todo entries.
